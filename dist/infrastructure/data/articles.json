@@ -1,0 +1,14 @@
+[
+    {
+      "id": "6912b0a3-0e00-4b33-ac62-aff1a93f6fe4",
+      "title": "Introduction à Node.js",
+      "content": "Node.js est une plateforme logicielle...",
+      "userId" : "12"
+    },
+    {
+      "id": "91597b53-25c5-40b0-bfe0-29375b42dd20",
+      "title": "Présentation d'Express",
+      "content": "Express simplifie le développement d'applications web...",
+      "userId" : "12"
+    }
+  ]

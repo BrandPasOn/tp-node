@@ -10,7 +10,7 @@
     "strict": true,                                      /* Enable all strict type-checking options. */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
-  "include": ["src/**/*.ts", "src/infrastructure/web/controllers/article.test.ts"],                            
+  "include": ["src/**/*.ts", "src/tests/test.test.ts"],                            
   "typedocOptions" : {
     "entryPoints" : ["src/**/*.ts"],
     "out" : "docs" 
