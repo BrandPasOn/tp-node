@@ -16,6 +16,9 @@ import env from "./config/env";
 import { requestLogger } from "./middlewares/logger";
 import { errorHandler } from "./middlewares/errorHandler";
 
+// app.ts
+import cors from 'cors';
+
 
 /**
  * Création intance app express
@@ -32,6 +35,12 @@ app.use(helmet());
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+// Configuration CORS pour permettre les requêtes de toutes les origines
+app.use(cors({
+    origin: 'http://localhost:5173', // Autoriser uniquement cette adresse à requêter sur le serveur
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Méthodes HTTP autorisées, les plus courantes, les autres seront bloquées
+    credentials: true // Autoriser les cookies
+}));
 
 /**
  * // Port d'écoute

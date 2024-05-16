@@ -1,4 +1,4 @@
-import { Article } from "../entities/Article";
+import { Article, NewArticle } from "../entities/Article";
 import { ArticleRepository } from "../../infrastructure/repositories/ArticleRepository";
 import crypto from 'crypto'
 
@@ -14,17 +14,10 @@ export class ArticleService {
      * Crée un nouvel article
      * @param article L'article à créer
      */
-    addArticle(article: Article): void {
-        const articles = this.articleRepository.getAllArticles();
-
-        // Ajoute le nouvel article à la liste des articles
-        articles.push({
-            id: crypto.randomUUID(),
-            ...article,
-        });
-
-        // Sauvegarde les articles
-        this.articleRepository.save(article);
+    async addArticle(article: NewArticle) {
+        if (article?.title?.trim().length < 1 || article?.content?.trim().length < 1)
+            return;
+        const newArticle = await this.articleRepository.createArticle(article);
     }
 
     /**
@@ -32,7 +25,7 @@ export class ArticleService {
      * @param title Le titre de l'article à récupérer
      * @returns L'article trouvé ou undefined si aucun article n'est trouvé avec le titre spécifié
      */
-    getArticleByTitle(title: string): Article | undefined {
+    getArticleByTitle(title: string) {
         return this.articleRepository.getByTitle(title);
     }
 
@@ -40,7 +33,18 @@ export class ArticleService {
      * Récupère tous les articles
      * @returns Tous les articles
      */
-    getAllArticles(): Article[] {
+    getAllArticles() {
         return this.articleRepository.getAllArticles();
+    }
+
+    /**
+     * Supprime un article
+     * @param id Id du l'article a supprimer
+     * @param userId Id de l'auteur de l'article
+     */
+    deleteArticleById(id: string) {
+        if (!id || id.trim().length < 3)
+            return;
+        return this.articleRepository.deleteArticle(id);
     }
 }

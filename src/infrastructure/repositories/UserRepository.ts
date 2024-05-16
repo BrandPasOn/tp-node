@@ -1,62 +1,85 @@
-import fs from 'fs';
+import { db } from "../data";
 import path from "path";
-import { User } from "../../domain/entities/User";
+import { NewUser, User, UserColumns } from "../../domain/entities/User";
+import { eq } from "drizzle-orm";
+import { users } from "../data/schema/users";
 
 // Repository qui gère le CRUD des utilisateurs
 export class UserRepository {
     private users: User[] = [];
 
-    // Le chemin du fichier JSON des utilisateurs (à partir du répertoire courant)
-    private filePath = path.join(__dirname, '..', 'data', 'users.json');
-
-    constructor() {
-        // Charge les données des utilisateurs à partir du fichier JSON dès le constructeur
-        this.loadUsers();
-    }
-
     /**
-     * Charge tous les utilisateurs
-     */
-    private loadUsers(): void {
-            const data = fs.readFileSync(this.filePath, 'utf-8');
-            this.users = JSON.parse(data);
-    }
-
-    /**
-     * Sauvegarde un nouvel utilisateur
+     * Création
      * @param user L'utilisateur à sauvegarder
      */
-    save(user: User): void {
-        // On récupère tous les users
-        const users = this.getAllUsers();
-
-        // On mets à jour le tableau récupéré, avec le nouvel utilisateur
-        users.push({
-            ...user,
-            id: crypto.randomUUID()
-        })
-            
-            // Convertit la liste d'utilisateurs en JSON
-            const jsonData = JSON.stringify(this.users, null, 2);
-            
-            // Écrit le JSON dans le fichier
-            fs.writeFileSync(this.filePath, jsonData, 'utf-8');
+    createUser(user: NewUser) {
+        try {
+            return db.insert(users).values(user).execute();
+        } catch (err) {
+            console.error(err);
+            throw new Error("Impossible de créer l'utilisateur")
+        }
     }
 
     /**
-     * Récupère un utilisateur par son nom d'utilisateur
-     * @param username Le nom d'utilisateur de l'utilisateur à récupérer
-     * @returns L'utilisateur trouvé ou undefined si aucun utilisateur n'est trouvé avec le nom d'utilisateur spécifié
+     * Récupère un utilisateur en fonction de son id
      */
-    getByUsername(username: string): User | undefined {
-        return this.users.find(user => user.username === username);
+    getUserById(id: string, columns: UserColumns): Promise<Partial<User | undefined>> {
+        try {
+            return db.query.users.findFirst({
+                where: eq(users.id, id),
+                columns
+            })
+            // SELECT id, username FROM users WHERE id = $1
+        } catch(err) {
+            console.error(err);
+            throw new Error("Impossible de récupérer l'utilisateur")
+        }
+    }
+
+    getUserByUsername(username: string, columns: UserColumns): Promise< Partial<User | undefined>> {
+        try {
+            return db.query.users.findFirst({
+                where: eq(users.username, username),
+                columns
+            })
+        } catch(err) {
+            console.error(err);
+            throw new Error("Impossible de récupérer l'utilisateur")
+        }
     }
 
     /**
      * Récupère tous les utilisateurs
      * @returns Tous les utilisateurs
      */
-    getAllUsers(): User[] {
-        return this.users;
+    getAllUsers(): Promise< Partial<User>[] > {
+        try {
+            return db.query.users.findMany({
+                columns: {
+                    id: true,
+                    username: true
+                }
+            });
+        } catch(err) {
+            console.error(err);
+            throw new Error("Impossible de récupérer les utilisateurs")
+        }
+    }
+
+    /**
+     * Met à jour un utilisateur
+     */
+    updateUser(user: User) {
+        try {
+            return db.update(users)
+                .set(user)
+                .where(
+                    eq(users.id, user.id)
+                ).execute();
+        } catch (err) {
+            console.error(err);
+            throw new Error("Impossible de mettre à jour l'utilisateur")
+        }
     }
 }

@@ -18,7 +18,7 @@ export const login = async (req: Request, res: Response) => {
         const { username, password } = req.body;
 
         // Récupérer l'utilisateur par son nom d'utilisateur
-        const user = userRepo.getByUsername(username);
+        const user = await userRepo.getUserByUsername(username, { id: true, username: true, password: true });
 
         if (!user) {
             // Si aucun utilisateur trouvé, renvoyer une erreur d'authentification
@@ -26,7 +26,7 @@ export const login = async (req: Request, res: Response) => {
         }
 
         // Vérifier le mot de passe
-        const passwordMatch = await bcrypt.compare(password, user.password);
+        const passwordMatch = await bcrypt.compare(password, user.password as string);
 
         if (!passwordMatch) {
             // Si le mot de passe ne correspond pas, renvoyer une erreur d'authentification
@@ -56,7 +56,8 @@ export const register = async (req: Request, res: Response) => {
         const { username, password } = req.body;
 
         // Vérifier si l'utilisateur existe déjà
-        if (userRepo.getByUsername(username)) {
+        const isExiste = await userRepo.getUserByUsername(username, { username: true });
+        if (isExiste) {
             return response(res, { statusCode: 400, message: 'User already exists' });
         }
 
@@ -70,7 +71,7 @@ export const register = async (req: Request, res: Response) => {
         };
 
         // Ajouter l'utilisateur à la base de données
-        userRepo.save(newUser);
+        userRepo.createUser(newUser);
 
         // Réponse réussie avec le token JWT
         response(res, { statusCode: 201, message: 'User registered successfully' });

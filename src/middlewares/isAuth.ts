@@ -25,10 +25,10 @@ export const isAuth = (req: Request, res: Response, next: NextFunction) => {
     try {
         // on décode le jwt dans le cookie 'token' avec notre secret
         const decoded = jwt.verify(token, JWT_SECRET);
-        const { id, name } = decoded as jwt.JwtPayload;
+        const { userId, name } = decoded as jwt.JwtPayload;
 
         // On ajoute le payload dans la propriété req pour pouvoir l'utiliser dans les routes
-        req.user = { id, name };
+        req.user = { userId, name };
 
         // On passe au controller ou au mw suivant: tout s'est bien passé
         next();
